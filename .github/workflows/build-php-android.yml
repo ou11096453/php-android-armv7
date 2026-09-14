@@ -1,0 +1,17 @@
+name: Build PHP 7.3.22 Android TV 32-bit
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y build-essential autoconf bison re2c pkg-config gettext libtool python3 zip unzip
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'ndk;25.2.9519653'
+      - run: bash build-android-armv7.sh
+      - run: bash verify-ku9-package.sh dist/php-7.3.22-android-armeabi-v7a.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php-7.3.22-android-armeabi-v7a
+          path: dist/php-7.3.22-android-armeabi-v7a.zip

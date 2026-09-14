@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ZIP="\${1:?usage: verify-ku9-package.sh package.zip}"; TMP="\$(mktemp -d)"; trap 'rm -rf "\$TMP"' EXIT; unzip -q "\$ZIP" -d "\$TMP"; test -x "\$TMP/bin/php"; test -s "\$TMP/runner/runner.php"; test -s "\$TMP/runner/spider.php"; readelf -h "\$TMP/bin/php" | grep -Eq 'Class:[[:space:]]+ELF32'; readelf -h "\$TMP/bin/php" | grep -Eq 'Machine:[[:space:]]+ARM'; "\$TMP/bin/php" -v | grep -F 'PHP 7.3.22'; "\$TMP/bin/php" -r 'if (PHP_INT_SIZE !== 4) exit(2);'; "\$TMP/bin/php" -r 'foreach (array("curl_init","json_encode","mb_strlen","openssl_encrypt") as \$f) if (!function_exists(\$f)) exit(3);'; echo "Ku9 package verification passed: \$ZIP"
