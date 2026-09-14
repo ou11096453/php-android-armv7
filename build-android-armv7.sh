@@ -9,12 +9,9 @@ SYSROOT=$ANDROID_HOME/ndk/$NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64
 HOST=armv7a-linux-androideabi21
 export PATH=$SYSROOT/bin:$PATH CC=$SYSROOT/bin/$HOST-clang CXX=$SYSROOT/bin/$HOST-clang++ AR=$SYSROOT/bin/llvm-ar RANLIB=$SYSROOT/bin/llvm-ranlib STRIP=$SYSROOT/bin/llvm-strip
 mkdir -p $WORK $PREFIX dist
-# OpenSSL 1.1.1's android-arm target still probes the pre-NDK-r19 GCC name.
-ln -sf $SYSROOT/bin/$HOST-clang $SYSROOT/bin/arm-linux-androideabi-gcc
-ln -sf $SYSROOT/bin/$HOST-clang++ $SYSROOT/bin/arm-linux-androideabi-g++
 fetch(){ curl --fail --location --retry 3 --output $2 $1; }
 fetch https://zlib.net/fossils/zlib-1.2.13.tar.gz $WORK/zlib.tgz; tar -xf $WORK/zlib.tgz -C $WORK; cd $WORK/zlib-1.2.13; CHOST=$HOST ./configure --static --prefix=$PREFIX; make -j2; make install
-fetch https://www.openssl.org/source/old/1.1.1/openssl-1.1.1w.tar.gz $WORK/openssl.tgz; tar -xf $WORK/openssl.tgz -C $WORK; cd $WORK/openssl-1.1.1w; ./Configure android-arm -D__ANDROID_API__=21 no-shared no-tests --prefix=$PREFIX; make -j2 build_sw; make install_sw
+fetch https://www.openssl.org/source/old/1.1.1/openssl-1.1.1w.tar.gz $WORK/openssl.tgz; tar -xf $WORK/openssl.tgz -C $WORK; cd $WORK/openssl-1.1.1w; ./Configure linux-generic32 -D__ANDROID_API__=21 no-shared no-tests --prefix=$PREFIX; make -j2 build_sw; make install_sw
 fetch https://curl.se/download/curl-7.79.1.tar.xz $WORK/curl.txz; tar -xf $WORK/curl.txz -C $WORK; cd $WORK/curl-7.79.1; ./configure --host=$HOST --prefix=$PREFIX --disable-shared --enable-static --with-ssl=$PREFIX --with-zlib=$PREFIX --disable-ldap --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-gopher --disable-manual; make -j2; make install
 fetch https://www.php.net/distributions/php-7.3.22.tar.gz $WORK/php.tgz; tar -xf $WORK/php.tgz -C $WORK; cd $WORK/php-7.3.22; ./buildconf --force
 LDFLAGS="-static-libgcc -L$PREFIX/lib" CPPFLAGS="-I$PREFIX/include" PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig ./configure --host=$HOST --prefix=/php --disable-all --enable-cli --enable-cgi --enable-mbstring --enable-json --enable-filter --enable-pcre --enable-session --enable-xml --with-curl=$PREFIX --with-openssl=$PREFIX --with-zlib=$PREFIX --with-libxml --without-sqlite3 --without-pdo --disable-phpdbg --disable-fpm --disable-maintainer-mode
